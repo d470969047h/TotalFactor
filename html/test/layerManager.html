@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图层叠加及管理</title>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+<div> 显示/隐藏：
+    <input type="checkbox" checked="checked" onclick="checkOsm(this);" />底图
+    <input type="checkbox" checked="checked" onclick="checkCircle(this);"/>圆
+    <input type="checkbox" checked="checked" onclick="checkPoint(this);"/>点
+</div>
+<div>
+    图层顺序：
+    <input name="seq" type="radio" value="" onclick="upOsm(this);" />底图最上
+    <input name="seq" type="radio" value="" checked="checked" onclick="upCircle(this);"/>圆最上
+    <input name="seq" type="radio" value="" onclick="upPoint(this);"/>点最上
+</div>
+
+<script>
+
+    // 创建3个图层
+    var osmLayer = new ol.layer.Tile({
+//        source: new ol.source.OSM()
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })
+    });
+    var pointLayer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+    var circleLayer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+
+    var myCenter =  [104.06667,30.66667 ];
+    new ol.Map({
+        // 在地图上添加上面创建的三个图层，图层顺序自下而上，依次是osm，point，circle
+        layers: [osmLayer, pointLayer, circleLayer],
+        view: new ol.View({
+            center: myCenter,
+            projection:'EPSG:4326',
+            zoom: 2
+        }),
+        target: 'map'
+    });
+
+    // 添加点
+    var point = new ol.Feature({
+        geometry: new ol.geom.Point( myCenter)
+    });
+    point.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 3,
+            fill: new ol.style.Fill({
+                color: 'red'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'red',
+                size: 3
+            })
+        })
+    }));
+    pointLayer.getSource().addFeature(point);
+
+
+    // 添加圆
+    var circle = new ol.Feature({
+        geometry: new ol.geom.Point(myCenter)
+    });
+    circle.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 10,
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                size: 1
+            })
+        })
+    }));
+    circleLayer.getSource().addFeature(circle);
+
+    // 隐藏显示osm图层
+    function checkOsm(elem) {
+        osmLayer.setVisible(elem.checked);
+    }
+
+    // 隐藏显示point图层
+    function checkPoint(elem) {
+        pointLayer.setVisible(elem.checked);
+    }
+
+    // 隐藏显示circle图层
+    function checkCircle(elem) {
+        circleLayer.setVisible(elem.checked);
+    }
+
+    // 置顶osm图层到最上面
+    function upOsm (elem) {
+        if (elem.checked) {
+            osmLayer.setZIndex(3);
+            circleLayer.setZIndex(circleLayer.getZIndex()-1);
+            pointLayer.setZIndex(pointLayer.getZIndex()-1);
+        }
+    }
+
+    // 置顶circle图层到最上面
+    function upCircle (elem) {
+        if (elem.checked) {
+            circleLayer.setZIndex(3);
+            osmLayer.setZIndex(osmLayer.getZIndex()-1);
+            pointLayer.setZIndex(pointLayer.getZIndex()-1);
+        }
+    }
+
+    // 置顶point图层到最上面
+    function upPoint(elem) {
+        if (elem.checked) {
+            pointLayer.setZIndex(3);
+            osmLayer.setZIndex(osmLayer.getZIndex()-1);
+            circleLayer.setZIndex(circleLayer.getZIndex()-1);
+        }
+    }
+
+</script>
+</body>
+</html>

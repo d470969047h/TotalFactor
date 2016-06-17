@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>动态改变图标</title>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+
+<script type="text/javascript">
+    var layer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+    var localLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url:'http://www.google.cn/maps/vt/pb=!1m4!1m3!1i{z}!2i{x}!3i{y}!2m3!1e0!2sm!3i345013117!3m8!2szh-CN!3scn!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0'
+        })
+//        source:new ol.source.OSM()
+/*        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })*/
+    });
+    var localView = new ol.View({
+        projection: 'EPSG:4326',
+        center: [116.322930,40.044670],
+        zoom: 10
+    });
+    var map = new ol.Map({
+        layers:[localLayer,layer],
+        view:localView,
+        target:'map'
+    });
+
+    // 添加一个空心的五角星
+    var star = new ol.Feature({
+        geometry:new ol.geom.Point([116.322930,40.044670])
+    });
+    var starStyle1 = new ol.style.Style({
+        image:new ol.style.RegularShape({
+            points:5,
+            radius1:20,
+            radius2:10,
+            stroke:new ol.style.Stroke({
+                color:'red',
+                size:2
+            })
+        })
+    });
+    star.setStyle(starStyle1);
+    layer.getSource().addFeature(star);
+    //监听地图点击事件
+    map.on('click',function (event) {
+        var feature = map.forEachFeatureAtPixel(event.pixel,function (feature) {
+            return feature;
+        });
+        if(feature){
+            //将空心五角星变为实心五角星
+            var style = feature.getStyle().getImage();
+            var starStyle2 = new ol.style.Style({
+                image:new ol.style.RegularShape({
+                    points:5,
+                    radius1:20,
+                    radius2:10,
+                    stroke:style.getStroke(),
+                    fill:new ol.style.Fill({
+                        color:'red'
+                    })
+                })
+            });
+            feature.setStyle(starStyle2);
+        }
+    });
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

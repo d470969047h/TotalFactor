@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>另类设置svg图标</title>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+
+<script type="text/javascript">
+  var layer = new ol.layer.Vector({
+      source:new ol.source.Vector()
+  });
+  var localLayer = new ol.layer.Tile({
+      source:new ol.source.XYZ({
+          url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+      })
+  });
+  var localView = new ol.View({
+        projection:'EPSG:4326',
+      center:[104,30],
+      zoom:10
+  });
+    var map = new ol.Map({
+        layers:[localLayer,layer],
+        view:localView,
+        target:'map'
+    });
+  /**
+   * 添加一个三角形的锚点
+   */
+  //定位
+  var triangle = new ol.Feature({
+      geometry:new ol.geom.Point([104,30])
+  });
+  //编写样式
+  var triangleStyle = new ol.style.Style({
+      image:new ol.style.RegularShape({
+          points:3,//顶点数
+          radius:10,//图形大小，单位为像素
+          stroke:new ol.style.Stroke({// 设置边的样式
+              color:'red',
+              size:2
+          })
+      })
+  });
+  // 应用（设置）样式
+  triangle.setStyle(triangleStyle);
+  // 添加到feature
+  layer.getSource().addFeature(triangle);
+   /**
+   * 添加一个五角星锚点
+   */
+    // 定位
+    var star = new ol.Feature({
+      geometry:new ol.geom.Point([104.1,30.1])
+   });
+    // 编写样式
+    var starStyle = new ol.style.Style({
+        image:new ol.style.RegularShape({
+            points:5,//顶点数
+            radius:10,//图形大小，单位为像素
+            stroke:new ol.style.Stroke({ // 边的样式
+                color:'red',
+                size:2
+            }),
+            fill:new ol.style.Fill({// 设置五角星填充样式
+                color:'red'
+            }),
+//            radius1:7
+            radius2:5
+        })
+    });
+    // 应用刚才编写的样式
+    star.setStyle(starStyle);
+    // 添加到feature
+    layer.getSource().addFeature(star);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

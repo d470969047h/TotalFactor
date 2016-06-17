@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>使用Feature + Style来实现(推荐),锚点图片显示和大小变化</title>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+
+<script type="text/javascript">
+   //我们需要一个vector的layer来放置图标
+    var layer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+    var localLayer = new ol.layer.Tile({
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })
+    });
+    var localView =  new ol.View({
+        projection: 'EPSG:4326',
+        center:[116.83959960937501,40.93841495689796],
+        zoom: 8
+    });
+   var map = new ol.Map({
+       layers: [localLayer, layer],
+       view: localView,
+       target: 'map'
+   });
+    // 创建一个Feature，并设置好在地图上anchor的位置
+    var anchor = new ol.Feature({
+        geometry: new ol.geom.Point([116.83959960937501,40.93841495689796])
+    });
+    //将“点”的样式设置为图片
+    var pointStyle = new ol.style.Style({
+        image:new ol.style.Icon({
+           src:'../images/icon.png',
+            anchor:[0.5,1] //设置图标位置
+       })
+    });
+    //设置样式，应用上面的样式
+    anchor.setStyle(pointStyle);
+    //添加到之前的创建的layer中
+    layer.getSource().addFeature(anchor);
+
+   //监听地图层级变化
+   map.getView().on('change:resolution',function () {
+       var style = anchor.getStyle();
+       //重新设置图标的缩放率，基于层级10来做缩放  scale：比例
+       style.getImage().setScale(this.getZoom()/10);
+       anchor.setStyle(style);
+   });
+   /**
+    * 为什么是[0.5, 1]这种值，表示什么？
+    * 默认情况下，位置坐标是按照比例的方式来设置的，
+    * 范围从0到1，x轴上0表示最左边，1表示最右边，y轴上0表示最上边，1表示最下边。
+    * 如代码所示，x设置为0.5可以让图片在x方向上居中，
+    * y设置为1可以让图片在y方向上移动到最底端。
+    */
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

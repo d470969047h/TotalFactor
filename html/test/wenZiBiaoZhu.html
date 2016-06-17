@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文字标注</title>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+
+<script type="text/javascript">
+    var layer = new ol.layer.Vector({
+        source:new ol.source.Vector()
+    });
+    var localLayer = new ol.layer.Tile({
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })
+    });
+    var localView = new ol.View({
+        projection: 'EPSG:4326',
+        center: [116.322930,40.044670],
+        zoom: 10
+    });
+    var map = new ol.Map({
+        layers:[localLayer,layer],
+        view:localView,
+        target:'map'
+    });
+
+    var anchor = new ol.Feature({
+        geometry:new ol.geom.Point([116.322930,40.044670])
+    });
+    //创建锚点样式为文字
+    var anchorStyle = new ol.style.Style({
+        text:new ol.style.Text({
+            // font: '10px sans-serif' 默认这个字体，可以修改成其他的，格式和css的字体设置一样
+            text:'我的住址在这里！',
+            fill:new ol.style.Fill({
+                color:'red'
+            })
+        })
+    });
+    //设置文字style
+    anchor.setStyle(anchorStyle);
+    layer.getSource().addFeature(anchor);
+
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

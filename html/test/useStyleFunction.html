@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>styleFunction应用</title>
+    <style>
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 12px;
+            left: -50px;
+            min-width: 280px;
+        }
+        .ol-popup:after, .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 48px;
+            margin-left: -10px;
+        }
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 48px;
+            margin-left: -11px;
+        }
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+        .ol-popup-closer:after {
+            content: "✖";
+        }
+    </style>
+</head>
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+<div id="map2" style="width: 100%"></div>
+
+<div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+    <div id="popup-content"></div>
+</div>
+<script type="text/javascript">
+    var home = [116.322930,40.044670];
+/*    var layer = new ol.layer.Vector({
+        source:new ol.source.Vector()
+    });
+    var localLayer = new ol.layer.Tile({
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })
+    });
+    var localView = new ol.View({
+        projection: 'EPSG:4326',
+        center: home,
+        zoom: 10
+    });
+    var map = new ol.Map({
+        layers:[localLayer,layer],
+        view:localView,
+        target:'map'
+    });*/
+
+/*    var anchor = new ol.Feature({
+        geometry:new ol.geom.Point(home)
+    });
+    // 应用style function ，动态获取样式
+    anchor.setStyle(function (resolution) {
+        return [new ol.style.Style({
+            image:new ol.style.Icon({
+                src:'../images/dh.jpg',
+                scale:map.getView().getZoom()/10
+            })
+        })]
+    });
+    layer.getSource().addFeature(anchor);*/
+
+
+
+    //**************************************************
+    //**************************************************
+    //**************************************************
+    // 创建layer使用的style function，根据feature的自定义type，返回不同的样式
+    var layerStyleFunction = function(feature, resolution) {
+        var type = feature.get('type');
+        var style = null;
+        // 点
+        if (type === 'point') {
+            style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 1,
+                    fill: new ol.style.Fill({
+                        color: 'red'
+                    })
+                })
+            });
+        } else if ( type === 'circle') { // 圆形
+            style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    stroke: new ol.style.Stroke({
+                        color: 'red',
+                        size: 1
+                    })
+                })
+            });
+        } else { // 其他形状
+            style = new ol.style.Style({
+                image: new ol.style.RegularShape({
+                    points: 5,
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'blue'
+                    })
+                })
+            });
+        }
+
+        // 返回 style 数组
+        return [style];
+    };
+
+    var layer2 = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: layerStyleFunction // 应用上面创建的 style function
+    });
+
+    var map2 = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            layer2
+        ],
+        target: 'map2',
+        view: new ol.View({
+            projection: 'EPSG:4326',
+            center: home,
+            zoom: 10
+        })
+    });
+
+    // 添加三个feature，并设置自定义属性 type
+    var rect = new ol.Feature({
+        geometry: new ol.geom.Point(home)
+    });
+    layer2.getSource().addFeature(rect);
+
+    var circle = new ol.Feature({
+        geometry: new ol.geom.Point(home)
+    });
+    circle.set('type', 'circle');
+    layer2.getSource().addFeature(circle);
+
+    var point = new ol.Feature({
+        geometry: new ol.geom.Point(home)
+    });
+    point.set('type', 'point');
+    layer2.getSource().addFeature(point);
+
+
+//***************************************
+//***************************************
+//***************************************
+//***************************************
+    /**
+     * Elements that make up the popup.
+     */
+    var container = document.getElementById('popup');
+    var content = document.getElementById('popup-content');
+    var closer = document.getElementById('popup-closer');
+
+
+    /**
+     * Create an overlay to anchor the popup to the map.
+     */
+    var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+        element: container,
+        autoPan: true,
+        autoPanAnimation: {
+            duration: 250
+        }
+    }));
+
+
+    /**
+     * Add a click handler to hide the popup.
+     * @return {boolean} Don't follow the href.
+     */
+    closer.onclick = function() {
+        overlay.setPosition(undefined);
+        closer.blur();
+        return false;
+    };
+
+
+    /**
+     * Create the map.
+     */
+    var layer = new ol.layer.Vector({
+        source:new ol.source.Vector()
+    });
+    var localLayer = new ol.layer.Tile({
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png',
+            crossOrigin: 'anonymous'
+        })
+    });
+    var localView = new ol.View({
+        projection: 'EPSG:4326',
+        center: home,
+        zoom: 10
+    });
+    var map = new ol.Map({
+        layers:[localLayer,layer],
+        view:localView,
+        overlays: [overlay],
+        target:'map'
+    });
+    var anchor = new ol.Feature({
+        geometry:new ol.geom.Point(home)
+    });
+    // 应用style function ，动态获取样式
+    anchor.setStyle(function (resolution) {
+        return [new ol.style.Style({
+            image:new ol.style.Icon({
+                src:'../images/dh.jpg',
+                scale:map.getView().getZoom()/10
+            })
+        })]
+    });
+    layer.getSource().addFeature(anchor);
+/*    var map = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.TileJSON({
+                    url: 'http://api.tiles.mapbox.com/v3/' +
+                    'mapbox.natural-earth-hypso-bathy.json',
+                    crossOrigin: 'anonymous'
+                })
+            })
+        ],
+        overlays: [overlay],
+        target: 'map',
+        view: new ol.View({
+            center: [0, 0],
+            zoom: 2
+        })
+    });*/
+
+
+    // 监听地图点击事件
+    map.on('singleclick', function(evt) {
+        // 获取当前点击坐标，并设置到HTML元素上去
+        var coordinate = evt.coordinate;
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326'));
+        content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
+        // 设置overlay的位置，从而显示在鼠标点击处
+        overlay.setPosition(coordinate);
+    });
+
+    /**
+     * 1.创建样式
+     * 2.vector应用1创建的各种形状应该用到的样式style
+     * 3.添加(创建)feature（各种形状...）
+     * 并将它添加打vector（ layer2.getSource().addFeature(point);）中
+     */
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

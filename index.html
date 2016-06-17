@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <!--公共 JS-->
+        <!--jQuery js-->
+        <script type="text/javascript" src="js/jquery.min.js" charset="utf-8"></script>
+        <!--openlayers 3 js-->
+        <script type="text/javascript" src="js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+        <!--easyUI js-->
+        <script type="text/javascript" src="js/jquery-easyui-1.4.5/jquery.easyui.min.js" charset="utf-8"></script>
+        <!--bootstrap js-->
+        <script type="text/javascript" src="js/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/myMap/draw/app.js"></script>
+    <!--公共 CSS-->
+        <!--openlayers 3样式-->
+        <link href="js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+        <!--easyUI样式-->
+        <link href="js/jquery-easyui-1.4.5/themes/bootstrap/easyui.css" rel="stylesheet" type="text/css" />
+        <link href="js/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" type="text/css" />
+        <!--bootstrap样式-->
+        <link href="js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <!-- 其他 CSS-->
+        <!-- 路径 CSS-->
+        <link href="css/route/hint.min.css" rel="stylesheet" type="text/css">
+        <link href="css/route/style.css" rel="stylesheet" type="text/css">
+        <!-- 绘制 -->
+        <link href="css/draw/style.css" rel="stylesheet" type="text/css" />
+        <!-- 基本样式 -->
+        <link href="css/maMap/totalFactor.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div>
+  <div id="map" class="map" style="width: 100%;"></div>
+
+  <div id="geo-marker" data-hint=""></div>
+  <div id="popup" class="ol-popup">
+     <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+     <div id="popup-content"></div>
+  </div>
+</div>
+
+
+<!-- 其他 JS -->
+    <!-- 路径 JS -->
+    <script src="js/myMap/route/reqwest.js" type="text/javascript"></script>
+    <!-- 基本 JS -->
+    <script src="js/myMap/totalFactor.js" type="text/javascript"></script>
+
+</body>
+<script type="text/javascript">
+
+</script>
+</html>

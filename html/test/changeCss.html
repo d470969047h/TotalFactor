@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>设置样式</title>
+</head>
+<!--<link href="../js/ol3-3.16.0/css/ol.css" rel="stylesheet" type="text/css" />-->
+<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+<script type="text/javascript">
+   //创建地图
+    var map = new ol.Map({
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: [-72.980624870461128, 48.161307640513321],
+            zoom: 8,
+            projection:'EPSG:4326'
+        }),
+        target: 'map'
+    });
+
+    var vectorLayer = new ol.layer.Vector({
+        source:new ol.source.Vector({
+//            url: '../js/ol3-3.16.0/examples/data/geojson/line-samples.geojson',     // 地图来源
+            url: '../data/geojson/line-samples.geojson',
+            format: new ol.format.GeoJSON()
+        }),
+        // 设置样式，颜色为红色，线条粗细为1个像素
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'red',
+                size: 1
+            })
+        })
+    });
+    map.addLayer(vectorLayer);
+</script>
+</body>
+</html>

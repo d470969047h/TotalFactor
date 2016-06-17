@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>测试ol3</title>
+    <link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+</head>
+<body>
+<p align="center"><strong>地图一</strong></p>
+<div id="navigate-container">
+    <input type="button" onClick="moveToLeft();" value="左移" />
+    <input type="button" onClick="moveToRight();" value="右移" />
+    <input type="button" onClick="moveToUp();" value="上移" />
+    <input type="button" onClick="moveToDown();" value="下移" />
+    <input type="button" onClick="moveToChengDu();" value="移到成都" />
+    <input type="button" onClick="zoomIn();" value="放大" />
+    <input type="button" onClick="zoomOut();" value="缩小" />
+</div>
+<input type="button" value="显示成都" onclick="fitToChengdu();" /><br>
+<div id="map1" style="width: 100%"></div>
+<input type="button" onClick="swapMap();" value="交换地图"/>
+<p align="center"><strong>地图二</strong></p>
+<span>地图二：(默认百度地图)</span>
+<input type="radio" checked="checked" name="mapSource" onclick="switch2OSM();" />OpenStreetMap地图
+<input type="radio" name="mapSource" onclick="switch2BingMap();" />Bing地图
+<input type="radio" name="mapSource" onclick="switch2StamenMap();" />Stamen地图
+<input type="radio" name="mapSource" onclick="switch2MapQuest();" />MapQuest地图
+<input type="radio" name="mapSource" onclick="switch2GoogleMap();" />Google地图
+<div id="map2" style="width: 100%"></div>
+<script>
+    // 设置成都坐标
+    var chengDuTransform = ol.proj.transform([104.06667,30.66667 ],'EPSG:4326','EPSG:3857');
+    var extent = [chengDuTransform[0]- 1392*1000/2, chengDuTransform[1]-744*1000/2, chengDuTransform[0]+1392*1000/2, chengDuTransform[1]+744*1000/2];
+    // 创建一个视图
+    var myView = new ol.View({
+        // 设置地图中心范围
+        //extent:[102,29,104,31],
+        // 中心
+       center:chengDuTransform,
+        // 指定投影使用EPSG:4326
+        //projection:'EPSG:3857',
+        // 限制地图缩放最大级别为14，最小级别为10
+        //minZoom:10,
+       // maxZoom:14,
+        zoom:10              // 并且定义地图显示层级为10
+    });
+    // 设置logo
+    var myLogo={ src:'../images/dh.jpg', href: 'http://www.daihui888.com/'};
+    // 基本设置
+    var mycontrols=ol.control.defaults({
+        attributionOptions:({
+            collapsible:false//控制右下角信息展开/关闭  默认：true
+        })
+    });
+    //获取本地图瓦片
+    var myMapTiles = new ol.layer.Tile({
+        source:new ol.source.XYZ({
+            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+        })
+    });
+        // 设置成都坐标
+        var chengDuTransformImage = ol.proj.transform([104.06667,30.66667 ],'EPSG:4326','EPSG:3857');
+        var extentImage = [chengDuTransformImage[0]- 1392*1000/2, chengDuTransformImage[1]-744*1000/2, chengDuTransformImage[0]+1392*1000/2, chengDuTransformImage[1]+744*1000/2];
+        // 创建一个用于放置活动图标的layer
+        var activityLayer = new ol.layer.Vector({
+            source:new ol.source.Vector()
+        });
+        // 创建一个活动图标需要的Feature，并设置位置
+        var activity = new ol.Feature({
+            //extentLeft+picX, extentTop+picY   [900,200]位活动坐标
+           geometry:new ol.geom.Point([chengDuTransformImage[0]-1392*1000/2+900*1000,chengDuTransformImage[1]-744*1000/2+(744-200)*1000])
+        });
+        // 设置Feature的样式，使用标记图标
+        activity.setStyle(new ol.style.Style({
+            image:new ol.style.Icon({
+                src: '../images/dh.jpg',
+                anchor: [0, 1],
+                scale: 0.2
+            })
+        }));
+        activityLayer.getSource().addFeature(activity);
+    //++++++++++++++++++++++++创建多个不同地图瓦片源 START+++++++++++++++++++++++++++++++++++
+    // Open Street Map 地图层
+    var openStreetMapLayer = new ol.layer.Tile({
+        source:new ol.source.OSM()
+    });
+    // Bing地图层
+//    var bingMapLayer = new ol.layer.Tile({
+//        key: 'AkjzA7OhS4MIBjutL21bkAop7dc41HSE0CNTR5c6HJy8JKc7U9U9RveWJrylD3XJ',
+//        imagerySet: 'Road'
+//    });
+
+    // Bing中文地图层
+    var bingMapLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            tileUrlFunction: function(tileCoord){
+                var z = tileCoord[0];
+                var x = tileCoord[1];
+                var y = -tileCoord[2] - 1;
+                var result='', zIndex=0;
+
+                for(; zIndex<z; zIndex++) {
+                    result = ((x&1)+2*(y&1)).toString() + result;
+                    x >>= 1;
+                    y >>= 1;
+                }
+                return 'http://dynamic.t0.tiles.ditu.live.com/comp/ch/' + result + '?it=G,VE,BX,L,LA&mkt=zh-cn,syr&n=z&og=111&ur=CN';
+            }
+        })
+    });
+    // Stamen地图层
+    var stamenMapLayer = new ol.layer.Tile({
+        source:new ol.source.Stamen({
+            layer: 'watercolor'
+        })
+    });
+    // MapQuest地图层
+    var mapQuestMapLayer = new ol.layer.Tile({
+        source:new ol.source.MapQuest({
+            layer:'osm'
+        })
+    });
+    // google地图层
+    var googleMapLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url:'http://www.google.cn/maps/vt/pb=!1m4!1m3!1i{z}!2i{x}!3i{y}!2m3!1e0!2sm!3i345013117!3m8!2szh-CN!3scn!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0'
+        })
+    });
+    //***************************baidu*********************
+    // 自定义分辨率和瓦片坐标系
+    var resolutions = [];
+    var maxZoom = 18;
+    // 计算百度使用的分辨率
+    for(var i=0; i<=maxZoom; i++){
+        resolutions[i] = Math.pow(2, maxZoom-i);
+    }
+    var tilegrid  = new ol.tilegrid.TileGrid({
+        origin: [0,0],    // 设置原点坐标
+        resolutions: resolutions    // 设置分辨率
+    });
+    // 创建百度地图的数据源
+    var baiduSource = new ol.source.TileImage({
+        projection: 'EPSG:3857',
+        tileGrid: tilegrid,
+        tileUrlFunction: function(tileCoord, pixelRatio, proj){
+            var z = tileCoord[0];
+            var x = tileCoord[1];
+            var y = tileCoord[2];
+            // 百度瓦片服务url将负数使用M前缀来标识
+            if(x<0){
+                x = 'M' + (-x);
+            }
+            if(y<0){
+                y = 'M' + (-y);
+            }
+            return "http://online0.map.bdimg.com/onlinelabel/?qt=tile&x="+x+"&y="+y+"&z="+z+"&styles=pl&udt=20160426&scaler=1&p=0";
+        }
+    });
+    // 百度地图层
+    var baiduMapLayer2 = new ol.layer.Tile({
+        source: baiduSource
+    });
+    //++++++++++++++++++++++++多个不同地图瓦片源 END+++++++++++++++++++++++++++++++++++++
+
+    // 创建地图1
+    var map1= new ol.Map({
+        controls:mycontrols,
+        // 设置地图图层
+//        layers: [
+            // 创建一个使用Open Street Map地图源的瓦片图层
+//            new ol.layer.Tile({source: new ol.source.OSM()})
+//        ],
+        logo:myLogo,
+        // 设置显示地图的视图
+        view: myView,
+        // 让id为map的div作为地图的容器
+        target: 'map1'
+    });
+        //iphone图
+/*        map1.addLayer(new ol.layer.Image({
+            source:new ol.source.ImageStatic({
+                url:'../images/iphone.png',
+                imageExtent:extentImage // 映射到地图的范围
+            })
+        }));*/
+    map1.addLayer(myMapTiles);
+  //  map1.addLayer(activityLayer);
+    //*****************************************************************************
+    // 创建地图2
+    var map2 = new ol.Map({
+        controls:mycontrols,
+        // 设置地图图层
+        layers: [
+            // 创建一个使用Open Street Map地图源的瓦片图层
+            baiduMapLayer2
+        ],
+        //logo:true,
+        logo:myLogo,
+        // 设置显示地图的视图
+        view: new ol.View({
+            center:[104.06,30.67 ],
+            projection:'EPSG:4326',
+            zoom: 10            // 并且定义地图显示层级为10
+        }),
+        // 让id为map的div作为地图的容器
+        target: 'map2'
+    });
+    //map2.addLayer(myMapTiles);
+//***********************************方***********************************
+//***********************************法***********************************
+    // 改变两个地图的容器
+    function swapMap() {
+        if(map1.getTarget()=='map1'){
+            map1.setTarget('map2');
+            map2.setTarget('map1');
+        }else {
+            map1.setTarget('map1');
+            map2.setTarget('map2');
+        }
+    }
+    // 向左移动地图1
+    function moveToLeft() {
+        var view = map1.getView();
+        var mapCenter = view.getCenter();
+        mapCenter[0] +=50000;
+        view.setCenter(mapCenter);
+        map1.render();
+    }
+    // 向右移动地图1
+    function moveToRight() {
+        var view = map1.getView();
+        var mapCenter = view.getCenter();
+        mapCenter[0] -= 50000;
+        view.setCenter(mapCenter);
+        map1.render();
+    }
+    // 向上移动地图1
+    function moveToUp() {
+        var view = map1.getView();
+        var mapCenter = view.getCenter();
+        mapCenter[1] -= 50000;
+        view.setCenter(mapCenter);
+        map1.render();
+    }
+    // 向下移动地图1
+    function moveToDown() {
+        var view = map1.getView();
+        var mapCenter = view.getCenter();
+        mapCenter[1] +=50000;
+        view.setCenter(mapCenter);
+        map1.render();
+    }
+    // 在地图1移动到成都
+    function moveToChengDu() {
+        var view = map1.getView();
+        // 设置地图中心为成都的坐标，即可让地图移动到成都
+        // view.setCenter(chengDuTransform);
+        view.setCenter([104.06,30.67 ]);
+        map1.render();
+    }
+    // 放大
+    function zoomIn() {
+        var view = map1.getView();
+        var zoom = view.getZoom();
+        // 让地图的zoom增加1，从而实现地图放大
+        view.setZoom(zoom+1);
+        map1.render();
+    }
+    // 缩小
+    function zoomOut() {
+        var view = map1.getView();
+        var zoom = view.getZoom();
+        view.setZoom(zoom - 1);
+        map1.render();
+    }
+    // 显示成都
+    function fitToChengdu() {
+        // 让地图最大化完全地显示区域[104, 30.6, 104.12, 30.74]
+        var view = map1.getView();
+        var mapSize = map1.getSize();
+        view.fit([104, 30.6, 104.12, 30.74],mapSize);
+    }
+    // 转为Open Street Map 地图层
+    function switch2OSM() {
+        // 先移除当前的地图，再添加Open Street Map 地图
+        var layer = map2.getLayers().item(0);
+        map2.removeLayer(layer);
+        map2.addLayer(openStreetMapLayer);
+    }
+    // 转为 Bing 地图层
+    function switch2BingMap() {
+        // 先移除当前的地图，再添加Bing地图
+        var layer = map2.getLayers().item(0);
+        map2.removeLayer(layer);
+        map2.addLayer(bingMapLayer);
+    }
+    // 转为 stamen 地图层
+    function switch2StamenMap() {
+        // 先移除当前的地图，再添加 stamen 地图
+        var layer = map2.getLayers().item(0);
+        map2.removeLayer(layer);
+        map2.addLayer(stamenMapLayer);
+    }
+    // 转为 mapQuest 地图层
+    function switch2MapQuest() {
+        // 先移除当前的地图，再添加 mapQuest 地图
+        var layer = map2.getLayers().item(0);
+        map2.removeLayer(layer);
+        map2.addLayer(mapQuestMapLayer);
+    }
+    // 转为 google 地图层
+    function switch2GoogleMap() {
+        // 先移除当前的地图，再添加 mapQuest 地图
+        var layer = map2.getLayers().item(0);
+        map2.removeLayer(layer);
+        map2.addLayer(googleMapLayer);
+    }
+
+</script>
+</body>
+</html>
+

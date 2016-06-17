@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>矢量地图测试</title>
+</head>
+<link href="../js/ol3-3.16.0/css/ol.css" rel="stylesheet" type="text/css" />
+<!--<script type="text/javascript" src="../js/ol3-3.16.0/src/ol/ol.js" charset="utf-8"></script>-->
+
+<!--<link href="../js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />-->
+<script type="text/javascript" src="../js/v3.16.0-dist/ol.js" charset="utf-8"></script>
+<body>
+<div id="map" style="width: 100%"></div>
+<div>矢量地图Feature总数： <span id="count"></span></div>
+<script type="text/javascript">
+    //本地地图
+    var myLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+//        source:new ol.source.XYZ({
+//            url:' http://localhost:8888/roadmap/{z}/{x}/{y}.png'
+//        })
+    });
+    var myVecor = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: '../js/ol3-3.16.0/examples/data/geojson/line-samples.geojson',     // 地图来源
+            format: new ol.format.GeoJSON()    // 解析矢量地图的格式化类
+        })
+    });
+    var myView =  new ol.View({
+        center: [-72.980624870461128, 48.161307640513321],
+        zoom: 8,
+        projection: 'EPSG:4326'
+    });
+    // 因为是异步加载，所以要采用事件监听的方式来判定是否加载完成
+    var listenerKey = myVecor.getSource().on('change', function(){
+        if (myVecor.getSource().getState() === 'ready') {    // 判定是否加载完成
+            document.getElementById('count').innerHTML = myVecor.getSource().getFeatures().length.toString();
+            myVecor.getSource().unByKey(listenerKey); // 注销监听器
+        }
+    });
+    var map = new ol.Map({
+        layers:[
+            // 底图用Open Street Map 地图
+            myLayer
+            // 再加载一个geojson的矢量地图
+            ,myVecor
+        ],
+        view: myView,
+        target:'map'
+    });
+    map.addLayer(myVecor);
+    // 如果在此处调用vectorLayer.getSource().getFeatures()是完全有可能获取不到任何Feature的，这是常犯错误
+/*
+* 1注释对代码进行了很好的说明，但有两点需要进一步说明：
+ 加载矢量图使用的source是ol.source.Vector, layer是ol.layer.Vector，不要错误的使用。
+ 加载代码之所以这么简单，是因为OpenLayers 3内置了对应矢量地图格式的解析类，比如ol.format.GeoJSON。 它们都位于包ol.format下面，可以在API官方文档中查询得到。
+ 如果是shapefile这种不支持的，则需要自己解析。 解析后，矢量地图都会转换为对应于OpenLayer s 3中的feature。
+ 所以，当加载完成后，可以通过source的getFeatures方法来获取所有的矢量图形。
+ 需要注意坐标系，因为.geojson文档里用的是和当前地图用的不一样的坐标系。
+ 对于不同格式的矢量地图，会有相应的一些不同用法，下面就针对一些大家经常会遇到的问题，给出相应的实例，用以说明。
+*
+* 2对于其他格式的矢量地图加载也需要这样编写代码，才能正确获取到加载完成的所有feature。
+ * */
+</script>
+</body>
+</html>
