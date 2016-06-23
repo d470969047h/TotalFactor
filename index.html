@@ -2,6 +2,28 @@
 <html>
 <head>
     <title></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--公共 CSS-->
+        <!--openlayers 3样式-->
+        <link href="js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
+        <!--easyUI样式-->
+        <link href="js/jquery-easyui-1.4.5/themes/bootstrap/easyui.css" rel="stylesheet" type="text/css" />
+        <link href="js/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" type="text/css" />
+        <!--bootstrap样式-->
+        <link href="js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <!-- Sidebar -->
+        <link href="css/sidebar/simple-sidebar.css" rel="stylesheet" type="text/css" />
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
     <!--公共 JS-->
         <!--jQuery js-->
         <script type="text/javascript" src="js/jquery.min.js" charset="utf-8"></script>
@@ -11,44 +33,49 @@
         <script type="text/javascript" src="js/jquery-easyui-1.4.5/jquery.easyui.min.js" charset="utf-8"></script>
         <!--bootstrap js-->
         <script type="text/javascript" src="js/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+        <!-- 绘制工具 -->
         <script type="text/javascript" src="js/myMap/draw/app.js"></script>
-    <!--公共 CSS-->
-        <!--openlayers 3样式-->
-        <link href="js/v3.16.0-dist/ol.css" rel="stylesheet" type="text/css" />
-        <!--easyUI样式-->
-        <link href="js/jquery-easyui-1.4.5/themes/bootstrap/easyui.css" rel="stylesheet" type="text/css" />
-        <link href="js/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" type="text/css" />
-        <!--bootstrap样式-->
-        <link href="js/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <!-- 其他 CSS-->
-        <!-- 路径 CSS-->
-        <link href="css/route/hint.min.css" rel="stylesheet" type="text/css">
-        <link href="css/route/style.css" rel="stylesheet" type="text/css">
-        <!-- 绘制 -->
-        <link href="css/draw/style.css" rel="stylesheet" type="text/css" />
-        <!-- 基本样式 -->
-        <link href="css/maMap/totalFactor.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div>
-  <div id="map" class="map" style="width: 100%;"></div>
-
+  <div id="wrapper" class="toggled">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+      <button type="button"style="float:right;" id="close-toggle"  class="btn btn-link">✖</button>
+        <ul class="sidebar-nav"style="margin-top:20px;">
+          <li class="sidebar-brand"> <a href="#"> 武器装备概览 </a></li>
+          <!-- <li><a href="#">Dashboard</a></li> -->
+        </ul>
+    </div>
+    <div id="map" class="map" style="width: 100%;"></div>
+  </div>
   <div id="geo-marker" data-hint=""></div>
   <div id="popup" class="ol-popup">
      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
      <div id="popup-content"></div>
   </div>
-</div>
 
-
+<!-- 其他 CSS-->
+    <!-- 基本样式 -->
+    <link href="css/myMap/totalFactor.css" rel="stylesheet" type="text/css" />
+    <!-- 路径 CSS-->
+    <link href="css/route/hint.min.css" rel="stylesheet" type="text/css">
+    <link href="css/route/style.css" rel="stylesheet" type="text/css">
+    <!-- 绘制 -->
+    <link href="css/draw/style.css" rel="stylesheet" type="text/css" />
 <!-- 其他 JS -->
     <!-- 路径 JS -->
     <script src="js/myMap/route/reqwest.js" type="text/javascript"></script>
     <!-- 基本 JS -->
     <script src="js/myMap/totalFactor.js" type="text/javascript"></script>
-
 </body>
 <script type="text/javascript">
-
+// $("#menu-toggle").click(function(e) {
+//     e.preventDefault();
+//     $("#wrapper").toggleClass("toggled");
+// });
+// $("#close-toggle").click(function(e) {
+//     e.preventDefault();
+//     $("#wrapper").toggleClass("toggled");
+// });
 </script>
 </html>

@@ -22,6 +22,10 @@ Amap.prototype = {
     clear: function() {
         this.source.clear();
         $(".tooltip").remove();
+        //清除侧栏
+        var myLi =   $('.sidebar-brand');
+        $(".sidebar-nav > li").remove();
+        $('.sidebar-nav').append(myLi);
     },
     /**
      * {
@@ -262,6 +266,37 @@ Amap.prototype = {
                 interaction.setActive(active);
             }
         }
-    }
+    },
+
+
+
+
+//+++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++
+//根据选择类型
+showModel:function (modelType) {
+   $.ajax({
+       url:'data/detailData.json',
+       type:'POST',
+       dataType:'json',
+       success :function (data) {
+          var myLi = ""
+           $.each(data,function(n,value) {
+              if(value.modelType==modelType){
+                getPoints(value,modelType,'');
+                myLi += '<li style="cursor:pointer;"><a onclick="javascript:goDetail('+value.lon+','+value.lat+',\'red\');">'+value.name+'</a></li>';
+              }
+           });
+          $('.sidebar-nav').append(myLi);
+          if($('.sidebar-nav').children('li').length > 1){
+            $("#wrapper").removeClass("toggled");
+          }
+       },
+       error:function (data) {
+            alert('未请求到数据！');
+       }
+   });
+}
+
 
 };
